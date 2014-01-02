@@ -39,11 +39,39 @@ There will be a pid file at pids/test_process.pid. The log file will be at log/t
 We can issue `kill [pid]` in order to exit the process gracefully. Please note that using `kill -9 [pid]` will terminate the process immediately.
 
 
-Run example
+Run an example
 --------------
 
 1. Install all dependencies: `bundle install`
 2. Run the example: `bundle exec ruby tests/example.rb`
+
+
+Daemonize a Rake task
+----------------------
+
+It can be used with a Rake task and, ultimately, use with Capistrano comfortably:
+
+```ruby
+namespace :daemon do
+  task :start => :environment do
+    is_running = true
+
+    d = TinyDaemon.new("some_task", "tmp/pids", "log")
+    d.stop
+    d.exit { is_running = false }
+    d.start do
+      while is_running
+        puts "Test"
+        sleep(0.1)
+      end
+    end
+  end
+
+  task :stop => :environment do
+    TinyDaemon.new("some_task", "tmp/pids", "log").stop
+  end
+end
+```
 
 
 Requirement
