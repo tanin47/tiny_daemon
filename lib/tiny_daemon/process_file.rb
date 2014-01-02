@@ -1,4 +1,4 @@
-class Taemons
+class TinyDaemon
   class ProcessFile < Struct.new(:app_name, :pid_dir)
     def pid_file_path
       File.join(self.pid_dir, "#{self.app_name}.pid")

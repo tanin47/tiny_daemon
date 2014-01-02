@@ -1,24 +1,21 @@
-Taemons
+tiny_daemon
 ================
 
-It daemonizes a Ruby block and supports graceful exiting.
+* It daemonizes a Ruby block and supports graceful exiting.
+* It only supports and guarantee running only one process at any moment
 
-It also maintains a pid file, so that it doesn't run more than 1 process at any moment.
 
-
-Requirement
+How to use
 --------------
 
-* >= Ruby 2.0
-* *nix platform
+Please include this into your Gemfile:
 
-
-How to
---------------
-
+```
+gem 'tiny_daemon'
+```
 
 ```ruby
-p = Taemons.new("test_process", "pids", File.join(Dir.pwd, 'log'))
+p = TinyDaemon.new("test_process", "pids", File.join(Dir.pwd, 'log'))
 
 p.stop # Allow only one instance to run at any moment
 
@@ -40,6 +37,29 @@ end
 There will be a pid file at pids/test_process.pid.
 
 We can issue `kill [pid]` in order to exit the process gracefully. Please note that using `kill -9 [pid]` will terminate the process immediately.
+
+
+Run example
+--------------
+
+1. Install all dependencies: `bundle install`
+2. Run the example: `bundle exec ruby tests/example.rb`
+
+
+Requirement
+--------------
+
+* >= Ruby 2.0
+* *nix platform
+
+
+How to develop
+--------------
+
+1. Install all dependencies: `bundle install`
+2. Run all tests: `bundle exec rake test`
+3. Start developing
+
 
 Author
 --------------

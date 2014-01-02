@@ -1,7 +1,11 @@
-require File.expand_path(__FILE__, '../taemons/process_file')
+require 'tiny_daemon/version'
+require 'tiny_daemon/process_file'
 
-class Taemons
+class TinyDaemon
   attr_accessor :app_name, :pid_dir, :log_dir
+
+  START_TIMEOUT = 5
+  STOP_TIMEOUT = 30
 
   def initialize(app_name, pid_dir, log_dir)
     @app_name = app_name
@@ -14,13 +18,15 @@ class Taemons
   end
 
   def process
-    @process ||= Taemons::ProcessFile.new(self.app_name, self.pid_dir)
+    @process ||= ProcessFile.new(self.app_name, self.pid_dir)
   end
 
   def start(&block)
-    Process.daemon(true, true)
-
+    raise "#{self.process.pid_file_path} already exists. The process might already run. Remove it manually if it doesn't." if self.process.get
+    
     Process.fork do
+      Process.daemon(true, true)
+
       self.process.store(Process.pid)
       reset_umask
       set_process_name
@@ -33,23 +39,38 @@ class Taemons
       at_exit { clean_process_file }
       block.call
     end
+
+    wait_until_start
+    self.process.get
   end
 
-  def stop
+  def stop(timeout_secs = STOP_TIMEOUT)
     pid = self.process.get
 
     if pid
       begin
         Process.kill('TERM', pid)
-        wait_until_exit(pid)
       rescue => e
-        puts "Cannot stop the process #{pid} properly: #{e.class}"
       end
+
+      wait_until_exit(pid, timeout_secs)
     end
   end
 
   private 
-  def wait_until_exit(pid)
+  def wait_until_start
+    start_time = Time.now.to_i
+    while self.process.get.nil?
+      sleep(0.1)
+
+      if (Time.now.to_i - start_time) > START_TIMEOUT
+        raise "Waiting too long (for #{START_TIMEOUT} seconds) to start. There might be an exception. Please check the log"
+      end
+    end
+  end
+
+  def wait_until_exit(pid, timeout_secs)
+    start_time = Time.now.to_i
     while true
       begin
         Process.kill(0, pid)
@@ -59,6 +80,10 @@ class Taemons
       end
 
       sleep(0.1)
+
+      if (Time.now.to_i - start_time) > timeout_secs
+        raise "Waiting too long (for #{timeout_secs} seconds) to exit."
+      end
     end
   end
 
