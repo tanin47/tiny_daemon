@@ -24,6 +24,7 @@ class TinyDaemon
   def start(&block)
     raise "#{self.process.pid_file_path} already exists. The process might already run. Remove it manually if it doesn't." if self.process.get
     
+    # We create a subprocess and daemonize it. So, it doesn't affect the current process
     Process.fork do
       Process.daemon(true, true)
 
@@ -33,7 +34,9 @@ class TinyDaemon
       redirect_io
 
       if @exit_block
-        trap("TERM") { exit_on_double_signals } # If `kill <pid>` is called, it will be trapped here
+        # If `kill <pid>` is called, it will be trapped here.
+        # Note: `kill -9 <pid>` will not be, and cannot be, trapped.
+        trap("TERM") { exit_on_double_signals } 
       end
 
       at_exit { clean_process_file }
