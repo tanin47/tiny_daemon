@@ -15,7 +15,7 @@ gem 'tiny_daemon'
 ```
 
 ```ruby
-p = TinyDaemon.new("test_process", "pids", File.join(Dir.pwd, 'log'))
+p = TinyDaemon.new("test_process", "pids", "log")
 
 p.stop # Allow only one instance to run at any moment
 
@@ -34,7 +34,7 @@ p.start do
 end
 ```
 
-There will be a pid file at pids/test_process.pid.
+There will be a pid file at pids/test_process.pid. The log file will be at log/test_process.log.
 
 We can issue `kill [pid]` in order to exit the process gracefully. Please note that using `kill -9 [pid]` will terminate the process immediately.
 
