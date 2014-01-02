@@ -1,4 +1,14 @@
-class Taemons < Struct.new(:app_name, :pid_dir, :log_dir)
+require File.expand_path(__FILE__, '../taemons/process_file')
+
+class Taemons
+  attr_accessor :app_name, :pid_dir, :log_dir
+
+  def initialize(app_name, pid_dir, log_dir)
+    @app_name = app_name
+    @pid_dir = pid_dir
+    @log_dir = log_dir
+  end
+
   def exit(&block)
     @exit_block = block
   end
