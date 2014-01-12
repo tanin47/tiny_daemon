@@ -94,3 +94,10 @@ Author
 
 Tanin Na Nakorn
 
+
+License
+-------------
+Do What The Fuck You Want To Public License (http://sam.zoy.org/wtfpl/)
+
+"You just DO WHAT THE FUCK YOU WANT TO."
+
